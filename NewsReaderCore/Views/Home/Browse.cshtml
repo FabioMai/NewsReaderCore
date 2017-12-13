@@ -1,0 +1,171 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/vue.js"></script>
+<br />
+<div id="loader" onload="myFunction()"></div>
+<div id="app" class="animate-bottom" style="display:none;">
+    
+    <div class="row justify-content-md-center">
+        <div class="col-lg-10">
+            <div class="row">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Select Source
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" v-on:click="getTopFromSource('', selectedCategory)">All</a>
+                        <a class="dropdown-item" v-for="source in sources" v-on:click="getTopFromSource(source.id, selectedCategory)">{{source.name}}</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Select Category
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                        <a class="dropdown-item" v-on:click="getTopFromSource(selectedSource, '')">All</a>
+                        <a class="dropdown-item" v-for="category in categories" v-on:click="getTopFromSource(selectedSource, category)">{{category}}</a>
+                    </div>
+                </div>
+            </div>
+            <h1 class="text-center">{{selectedSource}} {{selectedCategory}}</h1>
+            <h2 class="text-center" v-if="articles.length==0"> No articles for this selection.</h2>
+            <div v-for="article in articles" class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6">{{article.source.name}}</div>
+                        <div class="col-md-6 text-right">{{article.publishedAt}}</div>
+                    </div>
+                </div>
+                <div class="card-block">
+                    <div class="row">
+                        <div class="col-4">
+                            <img :src="article.urlToImage" class="newsImage" />
+                        </div>
+                        <div class="col-8">
+                            <h4 class="card-title">{{article.title}}</h4>
+                            <p class="card-text">{{article.description}}</p>
+                            <a :href="article.url" target="_blank" class="btn btn-primary">Go to the full article</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @* TODO implement paging for better loading times *@
+            @*<button class="btn btn-primary" v-for="index in articles.length % 15" v-on:click="getPaginatedArticles(articles, currentPage")>{{index+1}}</button>*@
+        </div>
+    </div>
+</div>
+
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            articles: [],
+            sources: [],
+            categories: ['business','entertainment','gaming','general','health-and-medical','music','politics','science-and-nature','sport','technology'],
+            selectedSource: "",
+            selectedCategory: "",
+            currentPage: 1,
+            searchText: ""
+        },
+        methods: {
+            getTopFromSource: function (source, category) {
+                var self = this;
+                if (source == "" && category != "") {
+                    self.selectedSource = "";
+                    var url = 'https://newsapi.org/v2/top-headlines?' +
+                        'category=' + category +
+                        '&apiKey=bac0e186ff0549898bc4b7e14bc4f8f5';
+                    self.selectedCategory = category;
+                } else if (source != "" && category == "") {
+                    self.selectedCategory = "";
+                    var url = 'https://newsapi.org/v2/top-headlines?' +
+                    'sources=' + source +
+                        '&apiKey=bac0e186ff0549898bc4b7e14bc4f8f5';
+                    self.selectedSource = source;              
+                } else if (category != "" && source != "") {
+                    var url = 'https://newsapi.org/v2/top-headlines?' +
+                        'sources=' + source +
+                        '&category=' + category +
+                        '&apiKey=bac0e186ff0549898bc4b7e14bc4f8f5';
+                    self.selectedCategory = category;
+                    self.selectedSource = source;
+                }
+                else {
+                    var url = 'https://newsapi.org/v2/top-headlines?' +
+                        'language=en&' +
+                        'apiKey=bac0e186ff0549898bc4b7e14bc4f8f5';
+                }
+
+                $.ajax({
+                    url: url,
+                    success: function (result) {
+                        self.articles = result.articles;
+                    }
+                });
+            },
+            // Pagination attempt - rewrite this
+            //getPaginatedArticles: function (articles, page) {
+            //    var self = this;
+            //    return articles.slice(page - 1 * 15, page * 15);
+            //},
+            search: function () {
+                var self = this;
+                console.log("yo" + self.searchText);
+                var url = 'https://newsapi.org/v2/everything?q=' +
+                    self.searchText + '&sortBy=publishedAt&apiKey=bac0e186ff0549898bc4b7e14bc4f8f5';
+
+                $.ajax({
+                    url: url,
+                    success: function (result) {
+                        self.articles = result.articles;
+                        console.log(result.articles);
+                    }
+                });
+            }
+        },
+        mounted: function () {
+            var self = this;
+            var url = 'https://newsapi.org/v2/top-headlines?' +
+                'language=en&' +
+                'apiKey=bac0e186ff0549898bc4b7e14bc4f8f5';
+            $.ajax({
+                url: url,
+                success: function (result) {
+                    self.articles = result.articles;
+                    console.log(self.articles);
+                }
+            });
+            url = 'https://newsapi.org/v2/sources?apiKey=bac0e186ff0549898bc4b7e14bc4f8f5';
+            $.ajax({
+                url: url,
+                success: function (result) {
+                    self.sources = result.sources;                    
+                }
+            });
+        }
+    })
+
+    var myVar;
+    
+    function showPage() {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("app").style.display = "block";
+    }
+    $(document).ready(function () {
+        myVar = setTimeout(showPage, 1500);
+
+        // Attempt at using the SMMRY API to summarize article automatically - problem: articles usually to long to be analyzed
+        //var SMMRYurl = "http://api.smmry.com/&SM_API_KEY=7E71928BBD&SM_LENGTH=5&SM_URL= " + "https://www.theguardian.com/politics/2017/nov/09/alex-salmond-to-host-talkshow-for-russian-broadcaster";
+        //$.ajax({
+        //    url: SMMRYurl,
+        //    dataType: 'jsonp',
+        //    success: function (result) {
+        //        console.log(result);
+        //        self.summary = result['sm_api_content'];
+        //    }
+        //});
+        //$("#test").text(self.summary);
+
+    });
+</script>

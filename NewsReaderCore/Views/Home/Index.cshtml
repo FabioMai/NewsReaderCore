@@ -1,0 +1,36 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*<img data-src="holder.js/100px250" class="img-fluid hidden-sm-down" style="height: 250px; width: 100%; display: block;" src="~/Images/pexels-photo-97050.jpeg" data-holder-rendered="true">*@
+<div class="jumbotron">
+    <div class="container">
+        <h1 class="display-3">Multi-source news reader</h1>
+        <p>Sort by category, search for key words, sort by top/new. Our article summaries help you find articles that actually interest you.</p>
+        <p><a class="btn btn-primary btn-lg" href="@Url.Action("Browse", "Home")" role="button">Start browsing &raquo;</a></p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Anti-clickbait</h2>
+            <p>Get a summary of the article before heading over. You won't fall for clickbait again.</p>
+        </div>
+        <div class="col-md-4">
+            <h2>Multi-source</h2>
+            <p>Choose from multiple news sources to fight potential biases. Read the best of the best.</p>
+        </div>
+        <div class="col-md-4">
+            <h2>Free & open-source</h2>
+            <p>I'm learning new frameworks, you're learning about what's going on in the world. Check out the <a href="#">GitHub</a>!</p>            
+        </div>
+    </div>
+</div>
+
+<style>
+    .jumbotron {
+        background-image: url('@Url.Content("~/Images/pexels-photo-97050.jpeg")');
+        height: 300px;
+    }
+</style>
